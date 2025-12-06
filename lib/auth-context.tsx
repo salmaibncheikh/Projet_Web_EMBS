@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
-export type UserRole = "mother" | "doctor" | "child"
+export type UserRole = "mother" | "doctor"
 
 export interface User {
   id: string
@@ -24,38 +24,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
-  // Initialize from localStorage on mount
+  // Don't auto-login on mount - removed localStorage check
   useEffect(() => {
-    const storedUser = localStorage.getItem("familyhealth_user")
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error("Failed to parse stored user:", error)
-        localStorage.removeItem("familyhealth_user")
-      }
-    }
+    // Check if there's a stored session but don't automatically set it
+    // User needs to explicitly login
     setLoading(false)
   }, [])
 
   const login = async (email: string, password: string) => {
     setLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
 
-      // Mock user data - in production, this would come from your backend
-      const mockUser: User = {
-        id: "user_" + Math.random().toString(36).substr(2, 9),
-        name: email.split("@")[0],
-        email,
-        role: "mother",
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur de connexion')
       }
 
-      setUser(mockUser)
-      localStorage.setItem("familyhealth_user", JSON.stringify(mockUser))
+      if (data.success && data.user) {
+        setUser(data.user)
+        localStorage.setItem("familyhealth_user", JSON.stringify(data.user))
+      } else {
+        throw new Error('Réponse invalide du serveur')
+      }
     } finally {
       setLoading(false)
     }
@@ -64,18 +64,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (name: string, email: string, password: string, role: UserRole) => {
     setLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      })
 
-      const newUser: User = {
-        id: "user_" + Math.random().toString(36).substr(2, 9),
-        name,
-        email,
-        role,
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la création du compte')
       }
 
-      setUser(newUser)
-      localStorage.setItem("familyhealth_user", JSON.stringify(newUser))
+      if (data.success && data.user) {
+        // Don't auto-login after signup, redirect to login page
+        // setUser(data.user)
+        // localStorage.setItem("familyhealth_user", JSON.stringify(data.user))
+      } else {
+        throw new Error('Réponse invalide du serveur')
+      }
     } finally {
       setLoading(false)
     }

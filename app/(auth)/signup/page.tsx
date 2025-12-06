@@ -45,17 +45,17 @@ export default function SignupPage() {
 
     try {
       await signup(formData.name, formData.email, formData.password, formData.role)
-      router.push("/home")
-    } catch (err) {
-      setError("Erreur lors de la création du compte. Veuillez réessayer.")
+      // Redirect to login page after successful signup
+      router.push("/login?registered=true")
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de la création du compte. Veuillez réessayer.")
       console.error(err)
     }
   }
 
   const roles = [
-    { value: "mother", label: "Mère", icon: Heart, color: "text-primary" },
-    { value: "doctor", label: "Médecin", icon: Brain, color: "text-accent" },
-    { value: "child", label: "Enfant", icon: Apple, color: "text-accent-secondary" },
+    { value: "mother", label: "Mère", icon: Heart, color: "text-primary", description: "Accès au dashboard familial" },
+    { value: "doctor", label: "Médecin", icon: Brain, color: "text-accent", description: "Accès au dashboard médical" },
   ]
 
   return (
@@ -117,21 +117,26 @@ export default function SignupPage() {
                   value={formData.role}
                   onValueChange={(value) => setFormData({ ...formData, role: value as UserRole })}
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {roles.map((role) => {
                       const Icon = role.icon
                       return (
                         <div
                           key={role.value}
-                          className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted cursor-pointer transition-colors"
+                          className="flex items-center space-x-3 p-4 rounded-lg border-2 border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer transition-all"
                         >
                           <RadioGroupItem value={role.value} id={role.value} />
                           <Label
                             htmlFor={role.value}
-                            className="flex items-center gap-2 cursor-pointer flex-1"
+                            className="flex items-center gap-3 cursor-pointer flex-1"
                           >
-                            <Icon className={`w-5 h-5 ${role.color}`} />
-                            <span>{role.label}</span>
+                            <div className={`p-2 rounded-lg ${role.color.replace('text-', 'bg-')}/10`}>
+                              <Icon className={`w-5 h-5 ${role.color}`} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-foreground">{role.label}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5">{role.description}</div>
+                            </div>
                           </Label>
                         </div>
                       )

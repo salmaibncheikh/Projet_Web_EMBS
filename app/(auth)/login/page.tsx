@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -15,12 +15,21 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
   const { login, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setSuccessMessage("Compte créé avec succès ! Veuillez vous connecter.")
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccessMessage("")
 
     if (!email || !password) {
       setError("Veuillez remplir tous les champs")
@@ -29,9 +38,22 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      router.push("/home")
-    } catch (err) {
-      setError("Erreur de connexion. Veuillez réessayer.")
+      
+      // Get user from localStorage to check role
+      const storedUser = localStorage.getItem("familyhealth_user")
+      if (storedUser) {
+        const user = JSON.parse(storedUser)
+        // Redirect based on role
+        if (user.role === "doctor") {
+          router.push("/dashboard")
+        } else {
+          router.push("/home")
+        }
+      } else {
+        router.push("/home")
+      }
+    } catch (err: any) {
+      setError(err.message || "Erreur de connexion. Veuillez réessayer.")
       console.error(err)
     }
   }
@@ -64,6 +86,12 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
+              {successMessage && (
+                <div className="p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-sm">
+                  {successMessage}
+                </div>
+              )}
+              
               {error && (
                 <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
                   {error}

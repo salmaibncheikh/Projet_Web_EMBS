@@ -20,6 +20,9 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login")
+    } else if (!loading && user && user.role === "doctor") {
+      // Redirect doctors to their own dashboard
+      router.push("/dashboard")
     }
   }, [user, loading, router])
 
