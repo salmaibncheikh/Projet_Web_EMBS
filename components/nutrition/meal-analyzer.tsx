@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/auth-context"
 
 interface FoodTopK {
   label: string
@@ -33,13 +34,14 @@ const API_ROUTE = "/api/nutrition/recipes"
 const formatPercent = (score: number) => `${(score * 100).toFixed(1)}%`
 
 export function MealAnalyzer() {
+  const { user } = useAuth()
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [portion, setPortion] = useState<number>(200)
-  const [topK, setTopK] = useState<number>(5)
   const [analysis, setAnalysis] = useState<FoodResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +95,7 @@ export function MealAnalyzer() {
       const formData = new FormData()
       formData.append("image", imageFile, imageFile.name || "upload.jpg")
       formData.append("portion_g", portion.toString())
-      formData.append("k", topK.toString())
+      formData.append("k", "1")
 
       const response = await fetch(API_ROUTE, {
         method: "POST",
@@ -113,6 +115,11 @@ export function MealAnalyzer() {
 
       const data = (await response.json()) as FoodResponse
       setAnalysis(data)
+
+      // Save meal to history
+      if (user && data.nutrition_per_portion) {
+        saveMealToHistory(data, imagePreview)
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unexpected error while analysing the meal."
       setError(message)
@@ -131,13 +138,40 @@ export function MealAnalyzer() {
     setPortion(nextValue)
   }
 
-  const handleTopKChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextValue = Number(event.target.value)
-    if (Number.isNaN(nextValue)) {
-      setTopK(1)
-      return
+  const saveMealToHistory = async (data: FoodResponse, imageUrl: string | null) => {
+    if (!user?._id || !data.nutrition_per_portion) return
+
+    setSaving(true)
+    try {
+      const response = await fetch('/api/nutrition/meals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          foodDetected: data.best_label,
+          portionG: data.nutrition_per_portion.portion_g,
+          nutrition: {
+            calories: data.nutrition_per_portion.calories,
+            protein: data.nutrition_per_portion.protein_g,
+            carbs: data.nutrition_per_portion.carbs_g,
+            fat: data.nutrition_per_portion.fat_g
+          },
+          mealType: 'snack', // Default to snack, can be enhanced with time-based detection
+          imageUrl: imageUrl || undefined
+        })
+      })
+
+      if (response.ok) {
+        console.log('Meal saved successfully')
+      }
+    } catch (error) {
+      console.error('Error saving meal:', error)
+      // Don't show error to user, this is background operation
+    } finally {
+      setSaving(false)
     }
-    setTopK(Math.min(Math.max(nextValue, 1), 10))
   }
 
   return (
@@ -177,7 +211,7 @@ export function MealAnalyzer() {
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="portion">Portion (g)</Label>
                   <Input
@@ -188,10 +222,6 @@ export function MealAnalyzer() {
                     value={portion}
                     onChange={handlePortionChange}
                   />
-                </div>
-                <div>
-                  <Label htmlFor="topk">Top predictions</Label>
-                  <Input id="topk" type="number" min={1} max={10} value={topK} onChange={handleTopKChange} />
                 </div>
                 <div className="flex items-end">
                   <Button
@@ -237,19 +267,8 @@ export function MealAnalyzer() {
               <Card>
                 <CardContent className="pt-6 space-y-3">
                   <div>
-                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Best match</p>
+                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Detected food</p>
                     <p className="text-2xl font-semibold text-foreground">{analysis.best_label}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Top predictions</p>
-                    <ul className="space-y-2">
-                      {analysis.topk.map((item) => (
-                        <li key={item.label} className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{item.label}</span>
-                          <span className="font-medium text-foreground">{formatPercent(item.score)}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </CardContent>
               </Card>

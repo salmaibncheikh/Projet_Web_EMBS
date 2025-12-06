@@ -45,12 +45,13 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
       >
         {/* Header */}
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-              <img src={logo.src} alt="Logo" width={150} height={150}/>
-
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+              <img src={logo.src} alt="Logo" className="w-10 h-10 object-contain"/>
             </div>
-            <span className="font-bold text-sidebar-foreground"> Etma'En </span>
+            <span className="font-bold text-xl text-sidebar-foreground bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Etma'En
+            </span>
           </div>
           <button
             onClick={() => onOpenChange(false)}

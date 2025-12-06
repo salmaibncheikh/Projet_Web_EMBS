@@ -48,4 +48,5 @@ async function connectDB() {
   return cached.conn
 }
 
+export const clientPromise = connectDB()
 export default connectDB

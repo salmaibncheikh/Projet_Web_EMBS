@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Apple, Camera, MessageCircle, TrendingUp } from "lucide-react"
+import { Camera, MessageCircle, TrendingUp } from "lucide-react"
 import { MealAnalyzer } from "@/components/nutrition/meal-analyzer"
-import { NutritionDashboard } from "@/components/nutrition/dashboard"
+import { NutritionDashboard } from "@/components/nutrition/dashboard-dynamic"
 import { NutritionChatbot } from "@/components/nutrition/chatbot"
 
 export default function NutritionPage() {
@@ -19,7 +19,7 @@ export default function NutritionPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -31,10 +31,6 @@ export default function NutritionPage() {
           <TabsTrigger value="chatbot" className="flex items-center gap-2">
             <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Recettes</span>
-          </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
-            <Apple className="w-4 h-4" />
-            <span className="hidden sm:inline">Historique</span>
           </TabsTrigger>
         </TabsList>
 
@@ -64,18 +60,6 @@ export default function NutritionPage() {
             </CardHeader>
             <CardContent>
               <NutritionChatbot />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique Alimentaire</CardTitle>
-              <CardDescription>Consultez vos repas précédents et les analyses</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">Aucun historique pour le moment</div>
             </CardContent>
           </Card>
         </TabsContent>

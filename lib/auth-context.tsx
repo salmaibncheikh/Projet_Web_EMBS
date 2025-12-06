@@ -7,13 +7,16 @@ export type UserRole = "mother" | "doctor"
 
 export interface User {
   id: string
+  _id?: string // MongoDB ObjectId from chat backend
   name: string
   email: string
   role: UserRole
+  createdAt?: string
 }
 
 interface AuthContextType {
   user: User | null
+  setUser: (user: User | null) => void
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string, role: UserRole) => Promise<void>
@@ -146,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("familyhealth_user")
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, signup, logout }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, setUser, loading, login, signup, logout }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
