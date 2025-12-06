@@ -17,9 +17,8 @@
 - **App Router** : Organisation modulaire avec layouts partagés et routes groupées
 - **TypeScript** : Typage fort pour réduire les erreurs et améliorer la maintenabilité
 - **Écosystème riche** : Radix UI pour des composants accessibles, TailwindCSS pour le styling
-
 ### Backend : Architecture Microservices
-**3 services indépendants :**
+**4 services indépendants :**
 
 1. **FastAPI (Port 8000)** - Classification d'aliments
    - Performance exceptionnelle avec Python async
@@ -38,7 +37,14 @@
    - Intégration avec l'API Groq (Llama 3.1)
    - Isolation des fonctionnalités nutritionnelles
 
-4. **Analyse Émotionnelle (Intégrée au Frontend)**
+4. **Node.js + Socket.IO (Port 8080)** - Messagerie en temps réel
+   - Communication instantanée médecin-patient
+   - WebSocket pour messagerie en temps réel
+   - Gestion du statut en ligne des utilisateurs
+   - Persistance des messages dans MongoDB
+   - Support des images via Cloudinary (optionnel)
+
+5. **Analyse Émotionnelle (Intégrée au Frontend)**
    - Classification des émotions via dessins d'enfants
    - Modèle de deep learning pour détecter 7 émotions
    - API Next.js pour upload, analyse et téléchargement
@@ -114,13 +120,24 @@
 
 - **Dashboard Médecin**
   - Interface dédiée aux professionnels de santé
-  - Messagerie avec les patients
+  - Messagerie en temps réel avec les patients
   - Liste des conversations avec badges de notifications
   - Fonction de recherche de patients
   - Historique complet des échanges
+  - Statut en ligne des utilisateurs
+  - Support d'envoi d'images (avec Cloudinary)
   - Déconnexion sécurisée
 
-### 4.  Rapports et Suivi
+### 4. Messagerie en Temps Réel
+- **Communication Médecin-Patient**
+  - Messages instantanés via WebSocket
+  - Notifications en temps réel
+  - Historique des conversations persistant
+  - Statut en ligne/hors ligne
+  - Envoi de messages texte et images
+  - Interface intuitive pour les deux rôles
+
+### 5.  Rapports et Suivi
 - Génération de rapports de santé
 - Historique des consultations
 - Suivi de l'évolution nutritionnelle
@@ -249,11 +266,131 @@ python backend/launcher.py
 ```
 
 **Menu du launcher :**
-- Choisir l'option **4** pour démarrer tous les services
-- Les 3 APIs seront lancées simultanément :
+- **Option 1** : Food Classifier API (FastAPI, port 8000)
+- **Option 2** : Medical RAG API (Flask, port 5000)
+- **Option 3** : Nutritionist Chatbot API (Flask, port 9000)
+- **Option 4** : Chat/Messaging API (Node.js, port 8080)
+- **Option 5** : Start ALL services (recommandé)
+- **Option 6** : Exit
+
+**Choisir l'option 5** pour démarrer tous les services simultanément :
   - FastAPI (Food Classifier) : http://localhost:8000
   - Flask (Medical RAG) : http://localhost:5000
   - Flask (Nutritionist) : http://localhost:9000
+  - Node.js (Chat/Messaging) : http://localhost:8080
+
+##### 4.2 Démarrer le Frontend (Terminal 2)
+```bash
+npm run dev
+```
+
+Le frontend sera accessible sur : **http://localhost:3000**
+
+##### 4.3 Configuration de la Messagerie en Temps Réel
+
+**Configuration initiale MongoDB Atlas (IMPORTANT) :**
+
+Pour que la messagerie fonctionne, vous devez autoriser votre adresse IP dans MongoDB Atlas :
+
+1. **Aller sur MongoDB Atlas** : https://cloud.mongodb.com/
+2. **Se connecter** à votre compte
+3. **Sélectionner votre projet** (Cluster0)
+4. **Cliquer sur "Network Access"** dans le menu à gauche (section Security)
+5. **Cliquer sur "Add IP Address"**
+6. **Choisir l'une de ces options :**
+   - **"Add Current IP Address"** (recommandé pour testing)
+   - **OU "Allow Access from Anywhere"** : entrer `0.0.0.0/0` (pour développement uniquement)
+7. **Cliquer sur "Confirm"**
+8. **Attendre 1-2 minutes** que les changements prennent effet
+
+**Configuration du Chat Backend :**
+
+Le chat backend est déjà configuré dans `backend/chat-app-backend/.env` :
+```env
+MONGODB_URI=mongodb+srv://kardoussema:5wTvYJalgCwz8tUV@cluster0.8bnczjd.mongodb.net/etmaen
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+PORT=8081
+CLIENT_URL=http://localhost:3000
+```
+
+**Note :** Le port 8081 est utilisé au lieu de 8080 pour éviter les conflits avec d'autres services (comme Oracle TNS Listener).
+
+**Installation des dépendances du chat backend :**
+```bash
+cd backend/chat-app-backend
+npm install
+cd ../..
+```
+
+**Dépendances installées :**
+- `express` : Framework web Node.js
+- `socket.io` : WebSocket pour temps réel
+- `mongoose` : ODM MongoDB
+- `bcryptjs` : Hachage des mots de passe
+- `jsonwebtoken` : Authentification JWT
+- `cookie-parser` : Gestion des cookies
+- `cors` : Configuration CORS
+- `cloudinary` : Upload d'images (optionnel)
+- `nodemon` : Auto-reload en développement
+
+**Démarrage du Chat Backend :**
+
+Le chat backend démarre automatiquement quand vous choisissez **Option 5** (Start ALL services) dans le launcher.
+
+Ou individuellement :
+```bash
+python backend/launcher.py
+# Choisir Option 4 : Chat/Messaging API
+```
+
+**Vérification que le chat backend fonctionne :**
+- Le terminal devrait afficher : `Server running on port 8081`
+- Accéder à : http://localhost:8081 (devrait retourner une réponse)
+
+##### 4.4 Test de la Messagerie
+
+**Créer des comptes de test :**
+
+1. **Ouvrir** http://localhost:3000/signup
+2. **Créer un compte Médecin :**
+   - Nom : Dr. Test
+   - Email : doctor@test.com
+   - Mot de passe : test123456
+   - Rôle : **Médecin**
+3. **Créer un compte Mère :**
+   - Nom : Mère Test
+   - Email : mother@test.com
+   - Mot de passe : test123456
+   - Rôle : **Mère**
+
+**Tester la messagerie en temps réel :**
+
+1. **Fenêtre 1 (Navigateur normal) :**
+   - Se connecter comme **Médecin** (doctor@test.com)
+   - Aller sur **/dashboard** (redirection automatique)
+   - Vous devriez voir "Mère Test" dans la liste des utilisateurs
+
+2. **Fenêtre 2 (Mode incognito) :**
+   - Se connecter comme **Mère** (mother@test.com)
+   - Aller sur **/messaging**
+   - Vous devriez voir "Dr. Test" dans la liste des médecins
+
+3. **Envoyer des messages :**
+   - Cliquer sur le nom de l'utilisateur dans la liste
+   - Taper un message et cliquer sur Envoyer
+   - Le message devrait apparaître **instantanément** dans les deux fenêtres
+   - Les messages du médecin apparaissent en **bleu à droite**
+   - Les messages de la mère apparaissent en **gris à gauche**
+
+**Fonctionnalités de la messagerie :**
+- ✅ Messages instantanés (WebSocket)
+- ✅ Statut en ligne/hors ligne (point vert/gris)
+- ✅ Historique des conversations (persistant dans MongoDB)
+- ✅ Alignement des messages (droite pour envoyés, gauche pour reçus)
+- ✅ Horodatage de chaque message
+- ✅ Liste des utilisateurs avec rôles
+- ✅ Recherche d'utilisateurs
+- ✅ Notifications en temps réel
 
 ##### 4.2 Démarrer le Frontend (Terminal 2)
 ```bash
@@ -332,8 +469,18 @@ v0-mother-health-app-main/
 │   │   └── data/                # Documents médicaux
 │   ├── Nutritionist/            # Flask - Chatbot Nutritionniste
 │   │   └── Nutrutionist__backend.py
+│   ├── chat-app-backend/        # Node.js - Messagerie temps réel
+│   │   ├── src/
+│   │   │   ├── controllers/    # Logique métier
+│   │   │   ├── models/         # Schémas MongoDB (User, Message)
+│   │   │   ├── routes/         # Routes API
+│   │   │   ├── middleware/     # Auth JWT
+│   │   │   ├── lib/            # Socket.IO, DB, Cloudinary
+│   │   │   └── index.js        # Point d'entrée
+│   │   ├── package.json
+│   │   └── .env                # Config (MongoDB, JWT, Cloudinary)
 │   ├── requirments/             # Dépendances Python
-│   └── launcher.py              # Script de lancement unifié
+│   └── launcher.py              # Script de lancement unifié (4 services)
 ├── components/                   # Composants React réutilisables
 │   ├── layout/
 │   ├── mental-health/
@@ -400,6 +547,8 @@ v0-mother-health-app-main/
 ---
 
 ##  Dépannage
+
+### Problèmes Backend
 
 **Problème : Version Python incompatible**
 ```bash
@@ -469,6 +618,129 @@ curl http://localhost:3000/api/test-db
 ```
 
 **Problème : Utilisateurs non sauvegardés dans MongoDB**
+- Vérifier que MongoDB Atlas est accessible
+- Aller sur MongoDB Atlas → Network Access → Ajouter votre IP
+- Tester l'API : `curl http://localhost:3000/api/test-db`
+
+### Problèmes Messagerie
+
+**Problème : "Could not connect to MongoDB Atlas" ou "IP not whitelisted"**
+
+**Solution :**
+1. Aller sur https://cloud.mongodb.com/
+2. Se connecter au compte
+3. Sélectionner le projet et le cluster
+4. Cliquer sur **"Network Access"** (menu gauche, section Security)
+5. Cliquer sur **"Add IP Address"**
+6. Choisir **"Allow Access from Anywhere"** : entrer `0.0.0.0/0`
+7. Cliquer sur **"Confirm"**
+8. **Attendre 1-2 minutes** que les changements prennent effet
+9. Redémarrer les serveurs
+
+**Problème : "Port 8080 already in use" (EADDRINUSE)**
+
+**Solution :**
+```bash
+# Windows : Vérifier quel processus utilise le port
+netstat -ano | findstr :8080
+
+# Tuer le processus (nécessite droits admin)
+taskkill /PID <PID> /F
+
+# OU changer le port dans backend/chat-app-backend/.env
+PORT=8081
+```
+
+**Note :** Le projet utilise déjà le port 8081 par défaut pour éviter les conflits avec Oracle TNS Listener.
+
+**Problème : Messages n'apparaissent pas / "userId: undefined"**
+
+**Solution :**
+1. **Se déconnecter** complètement de l'application
+2. **Supprimer le localStorage** : 
+   - Ouvrir DevTools (F12)
+   - Aller dans Application → Local Storage
+   - Supprimer `familyhealth_user`
+3. **Se reconnecter** : La connexion va maintenant synchroniser l'ID du chat backend
+4. **Vérifier** : Les messages devraient maintenant s'aligner correctement
+
+**Problème : Chat backend ne démarre pas**
+
+**Solution :**
+```bash
+# Vérifier que Node.js est installé
+node --version
+npm --version
+
+# Installer les dépendances du chat backend
+cd backend/chat-app-backend
+npm install
+cd ../..
+
+# Démarrer manuellement pour voir les erreurs
+cd backend/chat-app-backend
+npm run dev
+```
+
+**Problème : Messages reçus mais pas envoyés (ou vice-versa)**
+
+**Solution :**
+1. **Ouvrir la console du navigateur** (F12)
+2. **Regarder les logs** : Chercher "Chat login successful" ou erreurs
+3. **Vérifier** que le Socket.IO est connecté : "Connected to chat server"
+4. **Si pas de logs** : Le chat backend n'est pas démarré ou l'authentification a échoué
+
+**Problème : Statut en ligne ne fonctionne pas**
+
+**Solution :**
+- Le statut en ligne utilise Socket.IO
+- S'assurer que le chat backend est bien démarré
+- Vérifier dans les DevTools → Network → WS (WebSocket) qu'une connexion existe
+- Si pas de connexion WebSocket : vérifier les erreurs CORS dans la console
+
+**Problème : Impossible de créer un compte (signup fails)**
+
+**Solution :**
+1. **Vérifier** que les deux backends sont démarrés :
+   - Next.js (port 3000)
+   - Chat backend (port 8081)
+2. **Regarder la console navigateur** pour les erreurs
+3. **Regarder le terminal du chat backend** pour voir si la requête arrive
+4. **Si "Email already used"** : L'utilisateur existe déjà, essayer un autre email
+5. **Si erreur password** : Le mot de passe doit faire au moins 6 caractères
+
+**Problème : Messages s'affichent tous du même côté**
+
+**Solution :**
+- C'est un problème d'ID utilisateur non synchronisé
+- Voir "Messages n'apparaissent pas" ci-dessus
+- Supprimer le localStorage et se reconnecter
+
+**Vérification de la configuration complète :**
+
+```bash
+# 1. Vérifier MongoDB Atlas (IP whitelist)
+#    → Aller sur cloud.mongodb.com → Network Access
+
+# 2. Vérifier les services en cours
+#    Terminal 1 : npm run dev (port 3000)
+#    Terminal 2 : python launcher.py → Option 5 (tous les services)
+#        - Food API : port 8000
+#        - Medical RAG : port 5000  
+#        - Nutritionist : port 9000
+#        - Chat Backend : port 8081
+
+# 3. Vérifier les URLs
+#    Frontend : http://localhost:3000
+#    Chat Backend : http://localhost:8081
+
+# 4. Tester la messagerie
+#    - Créer compte médecin + compte mère
+#    - Se connecter dans 2 fenêtres (normal + incognito)
+#    - Envoyer messages → doivent apparaître instantanément
+```
+
+**Problème : Utilisateurs non sauvegardés dans MongoDB**
 - Vérifier que le fichier `.env.local` existe à la racine du projet
 - S'assurer que la base de données `etmaen` est spécifiée dans l'URI
 - Redémarrer le serveur Next.js après modification du `.env.local`
@@ -481,6 +753,31 @@ curl http://localhost:3000/api/test-db
 - Vider le cache du navigateur
 - Vérifier que `router.refresh()` est appelé après `logout()`
 - Forcer un rafraîchissement complet : Ctrl+Shift+R (Windows) ou Cmd+Shift+R (macOS)
+
+**Problème : Chat backend ne démarre pas**
+```bash
+# Vérifier que Node.js est installé
+node --version
+npm --version
+
+# Installer les dépendances si nécessaire
+cd backend/chat-app-backend
+npm install
+
+# Vérifier le fichier .env
+# S'assurer que MONGODB_URI, JWT_SECRET, CLIENT_URL sont définis
+```
+
+**Problème : Erreur "npm not found" lors du lancement**
+- Ajouter Node.js au PATH Windows
+- Redémarrer le terminal après installation de Node.js
+- Utiliser l'option 4 du launcher pour tester le chat backend seul
+
+**Problème : Messages ne s'envoient pas**
+- Vérifier que le chat backend est démarré (port 8080)
+- Vérifier la connexion WebSocket dans la console du navigateur
+- S'assurer que les deux utilisateurs sont authentifiés
+- Vérifier que MongoDB est accessible
 
 **Problème : Fichiers d'upload émotionnels non supprimés**
 ```bash

@@ -51,8 +51,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.success && data.user) {
-        setUser(data.user)
-        localStorage.setItem("familyhealth_user", JSON.stringify(data.user))
+        // Also login to chat backend to get chat user ID
+        let chatUserId = null
+        try {
+          const chatResponse = await fetch('http://localhost:8081/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+          })
+          
+          if (chatResponse.ok) {
+            const chatUser = await chatResponse.json()
+            chatUserId = chatUser._id
+            console.log('Chat backend login successful, user ID:', chatUserId)
+          }
+        } catch (chatError) {
+          console.warn('Chat backend login failed:', chatError)
+          // Don't fail the main login if chat backend is down
+        }
+        
+        // Merge Next.js user with chat backend user ID
+        const completeUser = {
+          ...data.user,
+          _id: chatUserId || data.user._id, // Use chat backend ID or fallback to Next.js ID
+          password: password // Store temporarily for chat backend auth
+        }
+        
+        setUser(completeUser)
+        localStorage.setItem("familyhealth_user", JSON.stringify(completeUser))
       } else {
         throw new Error('Réponse invalide du serveur')
       }
@@ -79,9 +106,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.success && data.user) {
+        // Also create user in chat backend
+        try {
+          const chatResponse = await fetch('http://localhost:8081/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, password, role })
+          })
+          
+          if (!chatResponse.ok) {
+            const errorText = await chatResponse.text()
+            console.error('Chat backend signup error (status ' + chatResponse.status + '):', errorText)
+            try {
+              const chatError = JSON.parse(errorText)
+              console.error('Parsed error:', chatError)
+            } catch (e) {
+              console.error('Could not parse error as JSON')
+            }
+          } else {
+            console.log('Chat backend signup successful!')
+          }
+        } catch (chatError) {
+          console.error('Chat backend signup failed:', chatError)
+          // Don't fail the main signup if chat backend is down
+        }
+        
         // Don't auto-login after signup, redirect to login page
-        // setUser(data.user)
-        // localStorage.setItem("familyhealth_user", JSON.stringify(data.user))
       } else {
         throw new Error('Réponse invalide du serveur')
       }

@@ -1,24 +1,35 @@
 import mongoose  from "mongoose";
+
+// UPDATED to match Next.js User schema with additional chat features
 const userSchema = new mongoose.Schema(
     {
+        name:{
+            type:String,
+            required:true,
+            trim: true
+        },
         email:{
             type:String,
             required:true,
-            unique:true
-        },
-        fullName:{
-            type:String,
-            required:true
+            unique:true,
+            lowercase: true,
+            trim: true
         },
         password:{
             type:String,
             required:true,
-            minlength:6
+            minlength:6,
+            select: false  // Don't return password by default
+        },
+        role:{
+            type:String,
+            enum: ['mother', 'doctor'],
+            required:true,
+            default:'mother'
         },
         profilePic:{
             type:String,
             default:"",
-
         },
         isOnline:{
             type:Boolean,
@@ -27,10 +38,6 @@ const userSchema = new mongoose.Schema(
         isBanned:{
             type:Boolean,
             default:false
-        },
-        isAdmin:{
-            type:Boolean,
-            default:false   
         }
     },
     { timestamps:true}
@@ -38,6 +45,7 @@ const userSchema = new mongoose.Schema(
 
 // Indexes for better query performance
 userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
 userSchema.index({ isOnline: 1 });
 userSchema.index({ isBanned: 1 });
 

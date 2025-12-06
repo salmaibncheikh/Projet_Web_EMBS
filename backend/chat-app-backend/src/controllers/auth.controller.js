@@ -5,11 +5,16 @@ import { generateToken } from "../lib/utilis.js";
 import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
-    const { fullName, password, email } = req.body;
+    const { name, password, email, role } = req.body;
 
     try {
+        console.log('Signup request:', { name, email, hasPassword: !!password, role });
+        console.log('Password type:', typeof password);
+        console.log('Password value:', password);
+        console.log('Full request body:', req.body);
+        
         // Validate input
-        if (!fullName || !email || !password) {
+        if (!name || !email || !password) {
             return res.status(400).json ({message: "All fields are required"});
         }
         // Check if user already exists
@@ -26,25 +31,39 @@ export const signup = async (req, res) => {
         if (password.length < 6) {
             return res.status(400).json({ message: "Your password must be at least 6 characters" });
         }
+        // Validate role
+        if (role && !['mother', 'doctor'].includes(role)) {
+            return res.status(400).json({ message: "Invalid role. Must be 'mother' or 'doctor'" });
+        }
         
         // Hash password
+        console.log('About to hash password...');
         const salt = await bcrypt.genSalt(10);
+        console.log('Salt generated:', salt);
         const hashed_pwd = await bcrypt.hash(password, salt);
+        console.log('Password hashed successfully');
+        
         // Add user to db
         const newUser = new User({
-            fullName,
+            name,
             email,
-            password: hashed_pwd
+            password: hashed_pwd,
+            role: role || 'mother'  // Default to mother if not specified
         });
+        console.log('About to save user...');
         await newUser.save();
+        console.log('User saved successfully');
+        
         // Generate jwt token
         generateToken(newUser._id, res);
+        console.log('Token generated');
+        
         // Respond with user data
-        // Note: profilePic is optional, so it may not be present in the user object
         res.status(201).json({
             _id: newUser._id,
-            fullName: newUser.fullName,
+            name: newUser.name,
             email: newUser.email,
+            role: newUser.role,
             profilePic: newUser.profilePic
         });
     } catch (error) {
@@ -53,7 +72,8 @@ export const signup = async (req, res) => {
             return res.status(400).json({ error: "Email already used, try another one!" });
         }
         console.log("Error in signup controller", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.log("Full error:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -62,38 +82,54 @@ export const login = async (req, res) => {
     const {  email,password  } = req.body;
     
     try {
+        console.log('Login request:', { email, hasPassword: !!password });
+        
         // Validate input
         if (!email || !password) {
             return res.status(400).json({ message: "All fields are required " });
         }
-        // Check if user exists
-        const user = await User.findOne({ email });
+        
+        console.log('Finding user...');
+        // Check if user exists - IMPORTANT: include password field explicitly
+        const user = await User.findOne({ email }).select('+password');
+        console.log('User found:', user ? { id: user._id, email: user.email, role: user.role, hasPassword: !!user.password } : 'NOT FOUND');
+        
         if (!user) {
             return res.status(400).json({ error: "Invalid credentials!" });
         }
         if (user.isBanned){
             return res.status(403).json({error : "You are banned from using this application!"});
         }
+        
+        console.log('Comparing password...');
         //check if password is correct
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password match:', isMatch);
+        
         if (!isMatch) {
             return res.status(400).json({ error: "Invalid credentials!" });
         }
+        
+        console.log('Setting user online...');
         user.isOnline = true; // set user as online
         await user.save(); // Save online status to database
         
-        generateToken(user._id,res) 
+        console.log('Generating token...');
+        generateToken(user._id,res)
+        
+        console.log('Login successful, sending response');
         res.status(200).json({
             _id: user._id,
-            fullName: user.fullName,
+            name: user.name,
             email: user.email,
+            role: user.role,
             profilePic: user.profilePic,
-            isOnline: user.isOnline,
-            isAdmin: user.isAdmin,
+            isOnline: user.isOnline
         });
     } catch (error) {
-        console.log("Error in signup controller", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.log("Error in login controller", error.message);
+        console.log("Full login error:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 

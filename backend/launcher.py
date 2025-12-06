@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Unified backend launcher for the three services:
+Unified backend launcher for the four services:
 - Food image classifier (FastAPI)
 - Medical RAG chatbot (Flask)
 - Nutritionist chatbot (Flask + Groq)
+- Real-time Chat/Messaging (Node.js + Socket.IO)
 """
 
 import subprocess
@@ -24,8 +25,9 @@ def print_menu() -> None:
     print("  1. Food classifier API (FastAPI, port 8000)")
     print("  2. Medical RAG API (Flask, port 5000)")
     print("  3. Nutritionist chatbot API (Flask, port 9000)")
-    print("  4. Start ALL services (8000 + 5000 + 9000)")
-    print("  5. Exit")
+    print("  4. Chat/Messaging API (Node.js, port 8080)")
+    print("  5. Start ALL services (8000 + 5000 + 9000 + 8080)")
+    print("  6. Exit")
     print()
 
 
@@ -65,6 +67,19 @@ def run_nutritionist_api() -> None:
         print("\n\nNutritionist API stopped.")
 
 
+def run_chat_api() -> None:
+    print("\n" + "=" * 60)
+    print("Starting Chat/Messaging API...".center(60))
+    print("=" * 60)
+    print("Endpoint: http://localhost:8081")
+    print("WebSocket: ws://localhost:8081\n")
+    cmd = ["npm", "run", "dev"]
+    try:
+        subprocess.run(cmd, cwd=ROOT / "chat-app-backend", shell=True)
+    except KeyboardInterrupt:
+        print("\n\nChat API stopped.")
+
+
 def run_all_servers() -> None:
     print("\n" + "=" * 60)
     print("Starting ALL backend services...".center(60))
@@ -73,13 +88,16 @@ def run_all_servers() -> None:
         ("Food Classifier (FastAPI)", [sys.executable, "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"], ROOT / "backend"),
         ("Medical RAG (Flask)", [sys.executable, "app.py"], ROOT / "Modele_rag"),
         ("Nutritionist Chatbot (Flask)", [sys.executable, "Nutrutionist__backend.py"], ROOT / "Nutritionist"),
+        ("Chat/Messaging (Node.js)", ["npm", "run", "dev"], ROOT / "chat-app-backend"),
     ]
 
     processes: list[tuple[str, subprocess.Popen]] = []
     try:
         for name, cmd, cwd in services:
             print(f"-> Launching {name}...")
-            proc = subprocess.Popen(cmd, cwd=cwd)
+            # Use shell=True on Windows for npm commands
+            use_shell = "npm" in cmd[0] if cmd else False
+            proc = subprocess.Popen(cmd, cwd=cwd, shell=use_shell)
             processes.append((name, proc))
 
         print("\nAll services started. Press Ctrl+C to stop everything.\n")
@@ -104,7 +122,7 @@ def main() -> None:
     while True:
         print_menu()
         try:
-            choice = input("Enter your choice (1-5): ").strip()
+            choice = input("Enter your choice (1-6): ").strip()
             if choice == "1":
                 run_food_api()
             elif choice == "2":
@@ -112,12 +130,14 @@ def main() -> None:
             elif choice == "3":
                 run_nutritionist_api()
             elif choice == "4":
-                run_all_servers()
+                run_chat_api()
             elif choice == "5":
+                run_all_servers()
+            elif choice == "6":
                 print("\nExiting backend launcher. Goodbye!")
                 break
             else:
-                print("Invalid choice. Please select 1-5.\n")
+                print("Invalid choice. Please select 1-6.\n")
         except KeyboardInterrupt:
             print("\n\nExiting backend launcher. Goodbye!")
             break

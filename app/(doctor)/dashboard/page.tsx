@@ -1,108 +1,174 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Send, Search } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
+import { io, Socket } from "socket.io-client"
+
+interface User {
+  _id: string
+  name: string
+  email: string
+  role: string
+  isOnline?: boolean
+}
 
 interface Message {
-  id: string
-  patientName: string
-  patientEmail: string
-  content: string
-  timestamp: string
-  isFromPatient: boolean
+  _id: string
+  senderId: string
+  receiverId: string
+  text: string
+  createdAt: string
 }
 
-interface Conversation {
-  patientId: string
-  patientName: string
-  patientEmail: string
-  lastMessage: string
-  lastMessageTime: string
-  unreadCount: number
-}
+const CHAT_BACKEND_URL = 'http://localhost:8081'
 
 export default function DoctorMessagesPage() {
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
+  const { user } = useAuth()
+  const [socket, setSocket] = useState<Socket | null>(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
   const [messageInput, setMessageInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([])
+  const [isLoggedInToChat, setIsLoggedInToChat] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Mock data - will be replaced with real data from MongoDB
-  const conversations: Conversation[] = [
-    {
-      patientId: "1",
-      patientName: "Sarah Martin",
-      patientEmail: "sarah.martin@example.com",
-      lastMessage: "Merci docteur pour vos conseils",
-      lastMessageTime: "Il y a 2h",
-      unreadCount: 0,
-    },
-    {
-      patientId: "2",
-      patientName: "Marie Dubois",
-      patientEmail: "marie.dubois@example.com",
-      lastMessage: "J'ai une question concernant...",
-      lastMessageTime: "Il y a 5h",
-      unreadCount: 2,
-    },
-    {
-      patientId: "3",
-      patientName: "Emma Laurent",
-      patientEmail: "emma.laurent@example.com",
-      lastMessage: "Mon enfant va mieux",
-      lastMessageTime: "Hier",
-      unreadCount: 0,
-    },
-  ]
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
-  const messages: Message[] = [
-    {
-      id: "1",
-      patientName: "Sarah Martin",
-      patientEmail: "sarah.martin@example.com",
-      content: "Bonjour docteur, j'ai besoin de vos conseils concernant la nutrition de mon enfant.",
-      timestamp: "10:30",
-      isFromPatient: true,
-    },
-    {
-      id: "2",
-      patientName: "Docteur",
-      patientEmail: "",
-      content: "Bonjour Sarah, je serais ravi de vous aider. Quel âge a votre enfant ?",
-      timestamp: "10:35",
-      isFromPatient: false,
-    },
-    {
-      id: "3",
-      patientName: "Sarah Martin",
-      patientEmail: "sarah.martin@example.com",
-      content: "Il a 3 ans. Il refuse de manger des légumes.",
-      timestamp: "10:37",
-      isFromPatient: true,
-    },
-    {
-      id: "4",
-      patientName: "Docteur",
-      patientEmail: "",
-      content:
-        "C'est un problème courant à cet âge. Je vous recommande de présenter les légumes de différentes façons et de les intégrer dans ses plats préférés.",
-      timestamp: "10:40",
-      isFromPatient: false,
-    },
-  ]
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
-  const filteredConversations = conversations.filter((conv) =>
-    conv.patientName.toLowerCase().includes(searchQuery.toLowerCase())
+  // Auto-login to chat backend when component mounts
+  useEffect(() => {
+    const loginToChat = async () => {
+      if (!user) return
+
+      try {
+        // Get user from localStorage to get password (if stored)
+        const storedUser = localStorage.getItem('familyhealth_user')
+        if (!storedUser) return
+
+        const userData = JSON.parse(storedUser)
+        
+        // Login to chat backend
+        const response = await fetch(`${CHAT_BACKEND_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            email: userData.email, 
+            password: userData.password || 'defaultPassword123' // Fallback
+          })
+        })
+
+        if (response.ok) {
+          const chatUser = await response.json()
+          setIsLoggedInToChat(true)
+          
+          // Connect to Socket.IO
+          const newSocket = io(CHAT_BACKEND_URL, {
+            query: { userId: chatUser._id }
+          })
+
+          newSocket.on('connect', () => {
+            console.log('Connected to chat server')
+          })
+
+          newSocket.on('getOnlineUsers', (users: string[]) => {
+            setOnlineUsers(users)
+          })
+
+          newSocket.on('newMessage', (message: Message) => {
+            setMessages((prev) => [...prev, message])
+          })
+
+          setSocket(newSocket)
+
+          // Fetch users list
+          fetchUsers()
+        }
+      } catch (error) {
+        console.error('Chat login error:', error)
+      }
+    }
+
+    loginToChat()
+
+    return () => {
+      if (socket) {
+        socket.close()
+      }
+    }
+  }, [user])
+
+  const fetchUsers = async () => {
+    try {
+      console.log('Fetching users from chat backend...')
+      const response = await fetch(`${CHAT_BACKEND_URL}/api/message/users`, {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      console.log('Fetched users:', data)
+      // Filter to show only mothers
+      const mothers = data.filter((u: User) => u.role === 'mother')
+      console.log('Filtered mothers:', mothers)
+      setUsers(mothers)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+
+  const loadMessages = async (userId: string) => {
+    try {
+      const response = await fetch(`${CHAT_BACKEND_URL}/api/message/${userId}`, {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      setMessages(data)
+    } catch (error) {
+      console.error('Error loading messages:', error)
+    }
+  }
+
+  const handleUserSelect = (selectedUser: User) => {
+    setSelectedUser(selectedUser)
+    loadMessages(selectedUser._id)
+  }
+
+  const filteredUsers = users.filter((u) =>
+    u.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleSendMessage = () => {
-    if (messageInput.trim() && selectedConversation) {
-      // TODO: Send message to API
-      console.log("Sending message:", messageInput)
-      setMessageInput("")
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && selectedUser) {
+      try {
+        const response = await fetch(`${CHAT_BACKEND_URL}/api/message/send/${selectedUser._id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ text: messageInput })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to send message')
+        }
+
+        const sentMessage = await response.json()
+        setMessages((prev) => [...prev, sentMessage])
+        setMessageInput("")
+      } catch (error) {
+        console.error('Error sending message:', error)
+        alert('Impossible d\'envoyer le message')
+      }
     }
   }
 
@@ -113,17 +179,22 @@ export default function DoctorMessagesPage() {
           <h1 className="text-3xl font-bold text-foreground">Messages</h1>
           <p className="text-muted-foreground mt-1">Communiquez avec vos patientes</p>
         </div>
+        {!isLoggedInToChat && (
+          <div className="text-sm text-yellow-600">
+            Connexion au chat en cours...
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-250px)]">
-        {/* Conversations List */}
+        {/* Users List */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-lg">Conversations</CardTitle>
+            <CardTitle className="text-lg">Utilisateurs</CardTitle>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher une patiente..."
+                placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -132,33 +203,37 @@ export default function DoctorMessagesPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-border max-h-[calc(100vh-400px)] overflow-y-auto">
-              {filteredConversations.map((conv) => (
-                <button
-                  key={conv.patientId}
-                  onClick={() => setSelectedConversation(conv.patientId)}
-                  className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
-                    selectedConversation === conv.patientId ? "bg-muted" : ""
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-1">
-                    <p className="font-semibold text-foreground">{conv.patientName}</p>
-                    {conv.unreadCount > 0 && (
-                      <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
-                        {conv.unreadCount}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate mb-1">{conv.lastMessage}</p>
-                  <p className="text-xs text-muted-foreground">{conv.lastMessageTime}</p>
-                </button>
-              ))}
+              {filteredUsers.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  Aucun utilisateur trouvé
+                </div>
+              ) : (
+                filteredUsers.map((u) => (
+                  <button
+                    key={u._id}
+                    onClick={() => handleUserSelect(u)}
+                    className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
+                      selectedUser?._id === u._id ? "bg-muted" : ""
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-1">
+                      <p className="font-semibold text-foreground">{u.name}</p>
+                      {onlineUsers.includes(u._id) && (
+                        <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{u.email}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{u.role}</p>
+                  </button>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
 
         {/* Chat Area */}
         <Card className="lg:col-span-2 flex flex-col">
-          {selectedConversation ? (
+          {selectedUser ? (
             <>
               <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-3">
@@ -166,43 +241,54 @@ export default function DoctorMessagesPage() {
                     <MessageSquare className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">
-                      {conversations.find((c) => c.patientId === selectedConversation)?.patientName}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {conversations.find((c) => c.patientId === selectedConversation)?.patientEmail}
-                    </p>
+                    <CardTitle className="text-lg">{selectedUser.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                   </div>
+                  {onlineUsers.includes(selectedUser._id) && (
+                    <span className="ml-auto text-sm text-green-600 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      En ligne
+                    </span>
+                  )}
                 </div>
               </CardHeader>
 
               <CardContent className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[calc(100vh-500px)]">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isFromPatient ? "justify-start" : "justify-end"}`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-lg p-3 ${
-                        message.isFromPatient
-                          ? "bg-muted text-foreground"
-                          : "bg-primary text-primary-foreground"
-                      }`}
-                    >
-                      {message.isFromPatient && (
-                        <p className="text-xs font-semibold mb-1">{message.patientName}</p>
-                      )}
-                      <p className="text-sm">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.isFromPatient ? "text-muted-foreground" : "text-primary-foreground/70"
+                {messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    Aucun message. Commencez la conversation!
+                  </div>
+                ) : (
+                  messages.map((message) => {
+                    const isMyMessage = message.senderId?.toString() === user?._id?.toString()
+                    console.log('Doctor - Message:', { senderId: message.senderId, userId: user?._id, isMyMessage })
+                    return (
+                      <div
+                        key={message._id}
+                        className={`flex ${
+                          isMyMessage ? "justify-end" : "justify-start"
                         }`}
                       >
-                        {message.timestamp}
-                      </p>
+                        <div
+                          className={`max-w-[70%] rounded-lg p-3 ${
+                            isMyMessage
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          }`}
+                        >
+                        <p className="text-sm">{message.text}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {new Date(message.createdAt).toLocaleTimeString('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                    )
+                  })
+                )}
+                <div ref={messagesEndRef} />
               </CardContent>
 
               <div className="p-4 border-t border-border">
@@ -214,7 +300,7 @@ export default function DoctorMessagesPage() {
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                     className="flex-1"
                   />
-                  <Button onClick={handleSendMessage} className="btn-primary">
+                  <Button onClick={handleSendMessage} size="icon">
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
@@ -222,12 +308,9 @@ export default function DoctorMessagesPage() {
             </>
           ) : (
             <CardContent className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <MessageSquare className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium text-foreground mb-2">Sélectionnez une conversation</p>
-                <p className="text-sm text-muted-foreground">
-                  Choisissez une patiente pour commencer à discuter
-                </p>
+              <div className="text-center text-muted-foreground">
+                <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Sélectionnez un utilisateur pour commencer</p>
               </div>
             </CardContent>
           )}
