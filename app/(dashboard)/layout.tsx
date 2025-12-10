@@ -23,6 +23,9 @@ export default function DashboardLayout({
     } else if (!loading && user && user.role === "doctor") {
       // Redirect doctors to their own dashboard
       router.push("/dashboard")
+    } else if (!loading && user && user.role === "adolescent") {
+      // Redirect adolescents to their own dashboard
+      router.push("/teen/dashboard")
     }
   }, [user, loading, router])
 

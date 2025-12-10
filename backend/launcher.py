@@ -25,8 +25,8 @@ def print_menu() -> None:
     print("  1. Food classifier API (FastAPI, port 8000)")
     print("  2. Medical RAG API (Flask, port 5000)")
     print("  3. Nutritionist chatbot API (Flask, port 9000)")
-    print("  4. Chat/Messaging API (Node.js, port 8080)")
-    print("  5. Start ALL services (8000 + 5000 + 9000 + 8080)")
+    print("  4. Chat/Messaging API (Node.js, port 8081) ⭐ REQUIRED FOR MESSAGING")
+    print("  5. Start ALL services (8000 + 5000 + 9000 + 8081)")
     print("  6. Exit")
     print()
 
@@ -72,7 +72,11 @@ def run_chat_api() -> None:
     print("Starting Chat/Messaging API...".center(60))
     print("=" * 60)
     print("Endpoint: http://localhost:8081")
-    print("WebSocket: ws://localhost:8081\n")
+    print("WebSocket: ws://localhost:8081")
+    print("\n⭐ This enables messaging for:")
+    print("   - Mother/Doctor messaging")
+    print("   - Teen messaging")
+    print("   - Real-time chat with Socket.IO\n")
     cmd = ["npm", "run", "dev"]
     try:
         subprocess.run(cmd, cwd=ROOT / "chat-app-backend", shell=True)

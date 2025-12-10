@@ -30,6 +30,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/message',messageRoutes);
 app.use('/api/manageUsers',manageUsersRoutes);
+app.use('/api/users',manageUsersRoutes);  // Alias for /api/manageUsers for frontend compatibility
 
 
 

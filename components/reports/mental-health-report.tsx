@@ -71,8 +71,8 @@ export function MentalHealthReport() {
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center space-y-3">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="text-muted-foreground">Loading mental health report...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto" />
+          <p className="text-gray-600">Chargement du rapport santé mentale...</p>
         </div>
       </div>
     )
@@ -80,17 +80,17 @@ export function MentalHealthReport() {
 
   if (!stats || stats.summary.totalRecords === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-3">
-            <Brain className="w-12 h-12 mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Mental Health Data Yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Start tracking your emotions and chatting with our AI to see your mental wellness report!
-            </p>
+      <div className="bg-purple-50/30 backdrop-blur-sm rounded-2xl border border-purple-200/30 shadow-sm p-8">
+        <div className="text-center space-y-3">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400/20 to-pink-400/20 flex items-center justify-center mx-auto">
+            <Brain className="w-10 h-10 text-purple-500" />
           </div>
-        </CardContent>
-      </Card>
+          <h3 className="font-semibold text-gray-800 text-lg">Aucune donnée de santé mentale</h3>
+          <p className="text-sm text-gray-600">
+            Commencez à suivre vos émotions et à discuter avec notre IA pour voir votre rapport de bien-être mental !
+          </p>
+        </div>
+      </div>
     )
   }
 
@@ -127,59 +127,57 @@ export function MentalHealthReport() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-purple-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Check-ins</p>
-                <p className="text-2xl font-bold">{stats.summary.totalRecords}</p>
-              </div>
-              <Brain className="w-8 h-8 text-purple-500" />
+        <div className="bg-purple-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-purple-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Total Check-ins</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.summary.totalRecords}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-pink-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Emotions Tracked</p>
-                <p className="text-2xl font-bold">{stats.emotions.distribution && Object.keys(stats.emotions.distribution).length}</p>
-              </div>
-              <Smile className="w-8 h-8 text-pink-500" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400/70 to-purple-500/70 flex items-center justify-center shadow-sm">
+              <Brain className="w-6 h-6 text-white" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">AI Conversations</p>
-                <p className="text-2xl font-bold">{stats.summary.chatbotInteractions}</p>
-              </div>
-              <MessageCircle className="w-8 h-8 text-blue-500" />
+        <div className="bg-pink-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-pink-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Émotions Suivies</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.emotions.distribution && Object.keys(stats.emotions.distribution).length}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400/70 to-pink-500/70 flex items-center justify-center shadow-sm">
+              <Smile className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
 
-        <Card className={`border-l-4 ${
-          stats.sentiment.trend === 'improving' ? 'border-l-green-500' : 
-          stats.sentiment.trend === 'declining' ? 'border-l-red-500' : 
-          'border-l-gray-500'
+        <div className="bg-blue-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-blue-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Conversations IA</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.summary.chatbotInteractions}</p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400/70 to-blue-500/70 flex items-center justify-center shadow-sm">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className={`backdrop-blur-sm rounded-2xl border-l-4 p-6 shadow-sm hover:shadow-md transition-all ${
+          stats.sentiment.trend === 'improving' ? 'bg-green-50/60 border-green-400/60' : 
+          stats.sentiment.trend === 'declining' ? 'bg-red-50/60 border-red-400/60' : 
+          'bg-gray-50/60 border-gray-400/60'
         }`}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Wellness Trend</p>
-                <p className={`text-2xl font-bold ${getTrendColor(stats.sentiment.trend)}`}>
-                  {stats.sentiment.trend}
-                </p>
-              </div>
-              <span className="text-3xl">{getTrendIcon(stats.sentiment.trend)}</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Tendance</p>
+              <p className={`text-2xl font-bold capitalize ${getTrendColor(stats.sentiment.trend)}`}>
+                {stats.sentiment.trend === 'improving' ? 'Amélioration' : stats.sentiment.trend === 'declining' ? 'Déclin' : 'Stable'}
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <span className="text-3xl">{getTrendIcon(stats.sentiment.trend)}</span>
+          </div>
+        </div>
       </div>
 
       {/* Emotion Distribution */}

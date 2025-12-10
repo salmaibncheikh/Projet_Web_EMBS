@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
         },
         role:{
             type:String,
-            enum: ['mother', 'doctor'],
+            enum: ['mother', 'doctor', 'adolescent'],
             required:true,
             default:'mother'
         },

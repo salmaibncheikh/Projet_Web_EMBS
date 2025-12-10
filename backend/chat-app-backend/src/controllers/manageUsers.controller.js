@@ -66,4 +66,23 @@ export const getBnnedUsers = async (req,res) =>{
         console.log("Error in get banned users controller :", error.message);
         res.status(500).json({ error: "Internal server error" });           
     }
+}
+
+// Get all users except current user (for contact list)
+export const getAllUsers = async (req, res) => {
+    try {
+        const currentUserId = req.user._id;
+        
+        // Get all users except current user, exclude banned users
+        const users = await User.find({ 
+            _id: { $ne: currentUserId },
+            isBanned: false 
+        }).select("-password");
+        
+        console.log(`Found ${users.length} users for contact list`);
+        res.status(200).json(users);
+    } catch (error) {
+        console.log("Error in get all users controller:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
+}

@@ -77,8 +77,8 @@ export function NutritionReport() {
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center space-y-3">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="text-muted-foreground">Loading nutrition report...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto" />
+          <p className="text-gray-600">Chargement du rapport nutrition...</p>
         </div>
       </div>
     )
@@ -86,17 +86,17 @@ export function NutritionReport() {
 
   if (!stats || stats.summary.totalMeals === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-3">
-            <Apple className="w-12 h-12 mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Nutrition Data Yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Start analyzing your meals to see your nutrition report!
-            </p>
+      <div className="bg-green-50/30 backdrop-blur-sm rounded-2xl border border-green-200/30 shadow-sm p-8">
+        <div className="text-center space-y-3">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-400/20 flex items-center justify-center mx-auto">
+            <Apple className="w-10 h-10 text-green-500" />
           </div>
-        </CardContent>
-      </Card>
+          <h3 className="font-semibold text-gray-800 text-lg">Aucune donnée nutritionnelle</h3>
+          <p className="text-sm text-gray-600">
+            Commencez à analyser vos repas pour voir votre rapport nutritionnel !
+          </p>
+        </div>
+      </div>
     )
   }
 
@@ -118,53 +118,53 @@ export function NutritionReport() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-orange-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Meals</p>
-                <p className="text-2xl font-bold">{stats.summary.totalMeals}</p>
-              </div>
-              <Utensils className="w-8 h-8 text-orange-500" />
+        <div className="bg-orange-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-orange-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Total Repas</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.summary.totalMeals}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400/70 to-orange-500/70 flex items-center justify-center shadow-sm">
+              <Utensils className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-purple-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Daily Calories</p>
-                <p className="text-2xl font-bold">{stats.summary.averageDailyCalories}</p>
-              </div>
-              <Target className="w-8 h-8 text-purple-500" />
+        <div className="bg-purple-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-purple-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Calories/Jour</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.summary.averageDailyCalories}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400/70 to-purple-500/70 flex items-center justify-center shadow-sm">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Food Variety</p>
-                <p className="text-2xl font-bold">{stats.foodDiversity.uniqueFoods}</p>
-              </div>
-              <Apple className="w-8 h-8 text-blue-500" />
+        <div className="bg-blue-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-blue-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Variété</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.foodDiversity.uniqueFoods}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400/70 to-blue-500/70 flex items-center justify-center shadow-sm">
+              <Apple className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-green-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Goal Achievement</p>
-                <p className="text-2xl font-bold">{stats.summary.goalAchievementRate}%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
+        <div className="bg-green-50/60 backdrop-blur-sm rounded-2xl border-l-4 border-green-400/60 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Objectif Atteint</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.summary.goalAchievementRate}%</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400/70 to-green-500/70 flex items-center justify-center shadow-sm">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Macronutrients Progress */}

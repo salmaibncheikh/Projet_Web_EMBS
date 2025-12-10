@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!['mother', 'doctor'].includes(role)) {
+    if (!['mother', 'doctor', 'adolescent'].includes(role)) {
       return NextResponse.json(
         { success: false, error: 'Rôle invalide' },
         { status: 400 }

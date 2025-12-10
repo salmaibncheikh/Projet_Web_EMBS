@@ -46,6 +46,8 @@ export default function LoginPage() {
         // Redirect based on role
         if (user.role === "doctor") {
           router.push("/dashboard")
+        } else if (user.role === "adolescent") {
+          router.push("/teen/dashboard")
         } else {
           router.push("/home")
         }
@@ -59,84 +61,84 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-10 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="flex justify-center gap-3 mb-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <Heart className="w-6 h-6 text-primary" />
+            <div className="p-3 bg-gradient-to-br from-purple-400/20 to-purple-500/20 backdrop-blur-sm rounded-xl shadow-sm">
+              <Heart className="w-6 h-6 text-purple-600" />
             </div>
-            <div className="p-3 bg-accent/10 rounded-lg">
-              <Brain className="w-6 h-6 text-accent" />
+            <div className="p-3 bg-gradient-to-br from-pink-400/20 to-pink-500/20 backdrop-blur-sm rounded-xl shadow-sm">
+              <Brain className="w-6 h-6 text-pink-600" />
             </div>
-            <div className="p-3 bg-accent-secondary/10 rounded-lg">
-              <Apple className="w-6 h-6 text-accent-secondary" />
+            <div className="p-3 bg-gradient-to-br from-blue-400/20 to-blue-500/20 backdrop-blur-sm rounded-xl shadow-sm">
+              <Apple className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Etma'En</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-2">Etma'En</h1>
+          <p className="text-gray-600 font-medium">
             Santé mentale & Nutrition pour toute la famille
           </p>
         </div>
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle>Connexion</CardTitle>
-            <CardDescription>Accédez à votre compte Etma'En</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-purple-200/30 shadow-xl p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Connexion</h2>
+            <p className="text-gray-600 text-sm mt-1">Accédez à votre compte Etma'En</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
               {successMessage && (
-                <div className="p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-sm">
+                <div className="p-3 bg-green-50/80 backdrop-blur-sm border border-green-200/50 text-green-700 rounded-xl text-sm">
                   {successMessage}
                 </div>
               )}
               
               {error && (
-                <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+                <div className="p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 text-red-700 rounded-xl text-sm">
                   {error}
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="vous@exemple.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-purple-200/40 bg-white/60 focus:ring-2 focus:ring-purple-400/50 rounded-xl"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password" className="text-gray-700 font-medium">Mot de passe</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="border-purple-200/40 bg-white/60 focus:ring-2 focus:ring-purple-400/50 rounded-xl"
                   required
                 />
               </div>
-              <Button type="submit" className="w-full btn-primary" disabled={loading}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 text-white rounded-xl shadow-md" disabled={loading}>
                 {loading ? "Connexion..." : "Se connecter"}
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground text-center mb-4">
+            <div className="mt-6 pt-6 border-t border-purple-200/30">
+              <p className="text-sm text-gray-600 text-center mb-4">
                 Pas encore de compte ?
               </p>
               <Link href="/signup">
-                <Button variant="outline" className="w-full bg-transparent">
+                <Button variant="outline" className="w-full bg-white/60 border-purple-200/40 hover:bg-purple-50/50 text-gray-700 rounded-xl">
                   Créer un compte
                 </Button>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
       </div>
     </div>
   )

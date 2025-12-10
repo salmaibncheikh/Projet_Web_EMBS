@@ -182,3 +182,66 @@ export const checkAuth = async (req,res)=>{
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+// Auto signup/login - Creates user if doesn't exist, logs in if exists
+export const autoLogin = async (req, res) => {
+    const { name, email, role } = req.body;
+    
+    try {
+        console.log('Auto-login request:', { name, email, role });
+        
+        // Validate input
+        if (!name || !email || !role) {
+            return res.status(400).json({ message: "Name, email, and role are required" });
+        }
+        
+        // Validate role
+        if (!['mother', 'doctor', 'adolescent'].includes(role)) {
+            return res.status(400).json({ message: "Invalid role. Must be 'mother', 'doctor', or 'adolescent'" });
+        }
+        
+        // Check if user already exists
+        let user = await User.findOne({ email }).select('+password');
+        
+        if (!user) {
+            // Create new user with default password
+            console.log('User not found, creating new user...');
+            const defaultPassword = 'chat123'; // Default password for auto-created users
+            const salt = await bcrypt.genSalt(10);
+            const hashed_pwd = await bcrypt.hash(defaultPassword, salt);
+            
+            user = new User({
+                name,
+                email,
+                password: hashed_pwd,
+                role
+            });
+            
+            await user.save();
+            console.log('New user created:', user._id);
+        } else {
+            console.log('User already exists:', user._id);
+        }
+        
+        // Set user as online
+        user.isOnline = true;
+        await user.save();
+        
+        // Generate token
+        generateToken(user._id, res);
+        
+        // Return user data
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profilePic: user.profilePic,
+            isOnline: user.isOnline
+        });
+        
+    } catch (error) {
+        console.log("Error in autoLogin controller", error.message);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+}
