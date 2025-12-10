@@ -25,7 +25,7 @@ interface Message {
   createdAt: string
 }
 
-const CHAT_BACKEND_URL = 'http://localhost:8081'
+const CHAT_BACKEND_URL = 'http://localhost:8080'
 
 export default function DoctorMessagesPage() {
   const { user } = useAuth()

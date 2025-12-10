@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Heart, Brain, Apple } from "lucide-react"
+import { Heart, Brain, Apple, Smile } from "lucide-react"
 import { useAuth, type UserRole } from "@/lib/auth-context"
 
 export default function SignupPage() {
@@ -56,6 +56,7 @@ export default function SignupPage() {
   const roles = [
     { value: "mother", label: "Mère", icon: Heart, color: "text-primary", description: "Accès au dashboard familial" },
     { value: "doctor", label: "Médecin", icon: Brain, color: "text-accent", description: "Accès au dashboard médical" },
+    { value: "teen", label: "Adolescent", icon: Smile, color: "text-yellow-500", description: "Accès à l'espace ado" },
   ]
 
   return (

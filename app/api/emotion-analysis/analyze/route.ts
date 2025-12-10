@@ -8,6 +8,7 @@ export async function POST() {
     // Use project .venv Python (has all required packages)
     const pythonPath = join(
       process.cwd(),
+      "backend",
       ".venv",
       "Scripts",
       "python.exe"
