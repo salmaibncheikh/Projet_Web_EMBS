@@ -349,7 +349,6 @@ export default function TeenProfilePage() {
             
             <div className="space-y-4">
               {[
-                { key: 'medicationReminders', label: 'Rappels de médicaments', icon: Heart, description: 'Reçois des rappels pour prendre tes médicaments' },
                 { key: 'healthTips', label: 'Conseils santé quotidiens', icon: Smartphone, description: 'Astuces et conseils personnalisés chaque jour' },
                 { key: 'moodCheckIns', label: 'Check-ins humeur', icon: Moon, description: 'Rappels pour enregistrer ton humeur' },
                 { key: 'weeklyReports', label: 'Rapports hebdomadaires', icon: Calendar, description: 'Résumé de ta semaine santé' },

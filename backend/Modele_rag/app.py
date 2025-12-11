@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
+
+load_dotenv(override=True)
+print("GROQ_API_KEY loaded:", bool(os.getenv("GROQ_API_KEY")))
+
 from pathlib import Path
 # LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -11,13 +15,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from flask_cors import CORS
 
-# Charger les variables d'environnement (.env)
-# Try loading from ATT58074.env first, then .env
-env_path = Path(__file__).parent / "ATT58074.env"
-if env_path.exists():
-    load_dotenv(env_path)
-else:
-    load_dotenv()
+
 
 app = Flask(__name__)
 CORS(app)  
@@ -35,6 +33,7 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 # Initialiser le modèle Groq
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+print("GROQ_API_KEY:", GROQ_API_KEY)
 if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY n'est pas défini dans l'environnement (.env)")
 

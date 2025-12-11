@@ -322,21 +322,7 @@ export default function TeenDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/teen/medication">
-          <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-rose-200/30 shadow-sm p-6 hover:shadow-md transition-all cursor-pointer group">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-rose-400/70 to-rose-500/70 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <Pill className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-800">Médicaments</h3>
-                <p className="text-xs text-gray-600">1 rappel</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-700">Prendre ton traitement à 20h</p>
-          </div>
-        </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
         <Link href="/teen/academy">
           <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-orange-200/30 shadow-sm p-6 hover:shadow-md transition-all cursor-pointer group">
@@ -368,7 +354,7 @@ export default function TeenDashboard() {
           </div>
         </Link>
 
-        <Link href="/teen/brain-health/games">
+        <Link href="/teen/cognitive-games">
           <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-purple-200/30 shadow-sm p-6 hover:shadow-md transition-all cursor-pointer group">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-400/70 to-pink-400/70 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">

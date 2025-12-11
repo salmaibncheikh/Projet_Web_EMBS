@@ -2,10 +2,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from groq import Groq
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-# Load environment variables
-load_dotenv()
+dotenv_path = find_dotenv()
+print("dotenv_path found:", dotenv_path)
+
+load_dotenv(override=True)  # or ".env"
+print("Current working directory:", os.getcwd())
+print("MEFTEH:", os.getenv("MEFTEH"))
+
 
 app = Flask(__name__)
 CORS(app)
@@ -52,7 +57,8 @@ def generate_nutrition_advice():
         return jsonify({"response": response_text}), 200
 
     except Exception as e:
-        print("Erreur serveur:", e)
+        print("MEFTEH:", os.getenv("MEFTEH"))
+        print("Erreur serveur:",os.getenv("MEFTEH"), e)
         return jsonify({
             "response": (
                 "Je n’ai pas pu générer de réponse pour le moment. "

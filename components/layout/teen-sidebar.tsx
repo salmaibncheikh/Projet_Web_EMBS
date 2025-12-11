@@ -34,7 +34,6 @@ export default function TeenSidebar() {
     { icon: Target, label: "Suivi Santé", href: "/teen/health-tracking" },
     { icon: Apple, label: "Nutrition", href: "/teen/nutrition" },
     { icon: Brain, label: "Santé Mentale", href: "/teen/brain-health" },
-    { icon: Pill, label: "Médicaments", href: "/teen/medication" },
     { icon: BookOpen, label: "Académie Santé", href: "/teen/academy" },
     { icon: MessageSquare, label: "Messagerie", href: "/teen/messaging" },
     { icon: Settings, label: "Paramètres", href: "/teen/profile" },

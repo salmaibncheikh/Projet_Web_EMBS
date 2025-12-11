@@ -10,7 +10,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "FamilyHealth - Santé Mentale & Nutrition",
   description: "Plateforme holistique pour la santé mentale et nutritionnelle des enfants",
-  generator: "v0.app",
+  generator: "Supcom",
 }
 
 export default function RootLayout({
