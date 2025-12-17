@@ -158,3 +158,10 @@ Etma’en is built on a **microservices-based architecture**, ensuring scalabili
 ```bash
 git clone https://github.com/kard4318/Projet_Web_Objectif3
 cd embs/v0-mother-health-app-main
+---
+###Backend Setup
+python -m venv .venv
+.venv\Scripts\Activate.ps1   # Windows
+# source .venv/bin/activate   # Linux / macOS
+
+python -m pip install --upgrade pip
