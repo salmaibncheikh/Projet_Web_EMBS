@@ -171,12 +171,12 @@ pip install -r backend/requirments/requirements-langchain.txt
 pip install -r backend/requirments/requirements-ml.txt
 pip install -r backend/emotional_classification/model/requirements-LAPTOP-ROJQ4EUE.txt
 ---
-Frontend Setup
+###Frontend Setup
 npm install
 Backend (all services):
 
 python backend/launcher.py
 # Select option 5: Start ALL services
-Frontend:
+###Frontend:
 
 npm run dev
