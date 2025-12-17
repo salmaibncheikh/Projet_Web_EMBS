@@ -19,12 +19,11 @@ Etma’en combines **computer vision**, **natural language processing**, and **r
 
 ## 2. Application Preview
 
+
+
 ### Mother Dashboard
-<!-- =============================== -->
-<!--  SCREENSHOT: MOTHER DASHBOARD   -->
-<!-- =============================== -->
-<!-- Insert a screenshot of the Mother dashboard -->
-<!-- Example: ![Mother Dashboard](mom1.png) -->
+![Mother Dashboard](mom1.png)
+
 
 ### Child Dashboard
 <!-- =============================== -->
