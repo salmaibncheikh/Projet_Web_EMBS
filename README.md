@@ -5,6 +5,8 @@
 <!-- ================================================= -->
 <!-- Insert a project banner or logo here -->
 <!-- Example: ![Etma’en Banner](docs/banner.png) -->
+<!-- MAIN PROJECT IMAGE / BANNER -->
+![Etma’en Banner](tsyp13.png)
 
 ---
 
