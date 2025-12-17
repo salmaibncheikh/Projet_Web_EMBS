@@ -24,13 +24,8 @@ Etma’en combines **computer vision**, **natural language processing**, and **r
 ### Mother Dashboard
 ![Mother Dashboard](mom.png)
 
-
 ### Child Dashboard
-<!-- =============================== -->
-<!--  SCREENSHOT: CHILD DASHBOARD    -->
-<!-- =============================== -->
-<!-- Insert a screenshot of the Child / Teen dashboard -->
-<!-- Example: ![Child Dashboard](child.png) -->
+![Child Dashboard](assets/child.png)
 
 ---
 
