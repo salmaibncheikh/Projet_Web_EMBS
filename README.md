@@ -24,14 +24,14 @@ Etma’en combines **computer vision**, **natural language processing**, and **r
 <!--  SCREENSHOT: MOTHER DASHBOARD   -->
 <!-- =============================== -->
 <!-- Insert a screenshot of the Mother dashboard -->
-<!-- Example: ![Mother Dashboard](docs/screenshot-mother-dashboard.png) -->
+<!-- Example: ![Mother Dashboard](mom1.png) -->
 
 ### Child Dashboard
 <!-- =============================== -->
 <!--  SCREENSHOT: CHILD DASHBOARD    -->
 <!-- =============================== -->
 <!-- Insert a screenshot of the Child / Teen dashboard -->
-<!-- Example: ![Child Dashboard](docs/screenshot-child-dashboard.png) -->
+<!-- Example: ![Child Dashboard](child.png) -->
 
 ---
 
