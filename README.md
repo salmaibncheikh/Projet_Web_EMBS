@@ -1,12 +1,6 @@
-# Etma’en – AI-Powered Family Health Platform
 
-<!-- ================================================= -->
-<!--  MAIN PROJECT IMAGE / BANNER                      -->
-<!-- ================================================= -->
-<!-- Insert a project banner or logo here -->
-<!-- Example: ![Etma’en Banner](docs/banner.png) -->
-<!-- MAIN PROJECT IMAGE / BANNER -->
 ![Etma’en Banner](tsyp13.png)
+# Etma’en – AI-Powered Family Health Platform
 
 ---
 
