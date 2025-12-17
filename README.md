@@ -165,3 +165,8 @@ python -m venv .venv
 # source .venv/bin/activate   # Linux / macOS
 
 python -m pip install --upgrade pip
+pip install -r backend/requirments/requirements.txt
+pip install -r backend/requirments/requirements-base.txt
+pip install -r backend/requirments/requirements-langchain.txt
+pip install -r backend/requirments/requirements-ml.txt
+pip install -r backend/emotional_classification/model/requirements-LAPTOP-ROJQ4EUE.txt
